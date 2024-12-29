@@ -1,0 +1,67 @@
+allocationPolicy:
+  instances:
+  - installGpuDrivers: true
+    policy:
+      accelerators:
+      - count: '1'
+        type: nvidia-l4
+      bootDisk:
+        image: projects/ml-images/global/images/c0-deeplearning-common-gpu-v20240128-debian-11-py310
+        sizeGb: '150'
+      machineType: g2-standard-16
+      provisioningModel: SPOT
+  labels:
+    batch-job-id: fine-tune-llama2
+  location:
+    allowedLocations:
+    - regions/us-central1
+    - zones/us-central1-a
+    - zones/us-central1-b
+    - zones/us-central1-c
+    - zones/us-central1-f
+  serviceAccount:
+    email: 946309508696-compute@developer.gserviceaccount.com
+createTime: '2024-12-29T10:29:38.596144389Z'
+logsPolicy:
+  destination: CLOUD_LOGGING
+name: projects/zebraai/locations/us-central1/jobs/fine-tune-llama2
+status:
+  runDuration: 0s
+  state: QUEUED
+taskGroups:
+- name: projects/946309508696/locations/us-central1/jobs/fine-tune-llama2/taskGroups/group0
+  parallelism: '1'
+  taskCount: '1'
+  taskSpec:
+    computeResource:
+      cpuMilli: '2000'
+      memoryMib: '2000'
+    environment:
+      secretVariables:
+        HUGGING_FACE_HUB_TOKEN: projects/946309508696/secrets/hugging-face-zebraai/versions/1
+      variables:
+        PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+        RESULTS_DIR: /mnt/disks/llm/fine-tune-results
+        SCRIPTS_DIR: /mnt/disks/llm/scripts
+        WORK_DIR: /tmp
+    runnables:
+    - script:
+        text: |-
+          #!/bin/bash
+          mkdir -p $WORK_DIR
+          mkdir -p $RESULTS_DIR
+          apt install -y python3-pip
+          pip3 install bitsandbytes datasets huggingface_hub peft torch transformers
+    - script:
+        text: |-
+          #!/bin/bash
+          python3 $SCRIPTS_DIR/download-model.py --output $WORK_DIR
+    - script:
+        text: |-
+          #!/bin/bash
+          python3 $SCRIPTS_DIR/fine-tune.py --input $WORK_DIR --output $RESULTS_DIR
+    volumes:
+    - mountPath: /mnt/disks/llm
+      nfs:
+        remotePath: /share
+        server: 10.162.172.194

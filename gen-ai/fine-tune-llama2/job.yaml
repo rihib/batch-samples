@@ -18,8 +18,8 @@ taskGroups:
           python3 $SCRIPTS_DIR/fine-tune.py --input $WORK_DIR --output $RESULTS_DIR
     volumes:
     - nfs:
-        server: <YOUR FILESTORE IP ADDRESS>
-        remotePath: <YOUR FILESTORE SHARE PATH, e.g. /share>
+        server: "10.162.172.194"
+        remotePath: "/share"
       mountPath: "/mnt/disks/llm"
     environment:
       variables:
@@ -28,17 +28,17 @@ taskGroups:
         SCRIPTS_DIR: /mnt/disks/llm/scripts
         PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       secretVariables:
-        HUGGING_FACE_HUB_TOKEN: projects/<YOUR PROJECT ID>/secrets/HuggingFaceHubToken/versions/1
+        HUGGING_FACE_HUB_TOKEN: projects/946309508696/secrets/hugging-face-zebraai/versions/1
 allocationPolicy:
-instances:
-- policy:
-    machineType: g2-standard-96
-    bootDisk:
-      image: projects/ml-images/global/images/c0-deeplearning-common-gpu-v20240128-debian-11-py310
-      sizeGb: 150
-    accelerators:
-    - type: nvidia-l4
-      count: 8
-  installGpuDrivers: true
+  instances:
+  - policy:
+      machineType: g2-standard-16
+      bootDisk:
+        image: projects/ml-images/global/images/c0-deeplearning-common-gpu-v20240128-debian-11-py310
+        sizeGb: 150
+      accelerators:
+      - type: nvidia-l4
+        count: 1
+    installGpuDrivers: true
 logsPolicy:
-destination: CLOUD_LOGGING
+  destination: CLOUD_LOGGING

@@ -1,0 +1,69 @@
+{
+  "taskGroups": [
+    {
+      "taskSpec": {
+        "runnables": [
+          {
+            "script": {
+              "text": "#!/bin/bash\nmkdir -p $WORK_DIR\nmkdir -p $RESULTS_DIR\napt install -y python3-pip\npip3 install bitsandbytes datasets huggingface_hub peft torch transformers"
+            }
+          },
+          {
+            "script": {
+              "text": "#!/bin/bash\npython3 $SCRIPTS_DIR/download-model.py --output $WORK_DIR"
+            }
+          },
+          {
+            "script": {
+              "text": "#!/bin/bash\npython3 $SCRIPTS_DIR/fine-tune.py --input $WORK_DIR --output $RESULTS_DIR"
+            }
+          }
+        ],
+        "volumes": [
+          {
+            "nfs": {
+              "server": "10.162.172.194",
+              "remotePath": "/share"
+            },
+            "mountPath": "/mnt/disks/llm"
+          }
+        ],
+        "environment": {
+          "variables": {
+            "WORK_DIR": "/tmp",
+            "RESULTS_DIR": "/mnt/disks/llm/fine-tune-results",
+            "SCRIPTS_DIR": "/mnt/disks/llm/scripts",
+            "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+          },
+          "secretVariables": {
+            "HUGGING_FACE_HUB_TOKEN": "projects/946309508696/secrets/hugging-face-zebraai/versions/1"
+          }
+        }
+      }
+    }
+  ],
+  "allocationPolicy": {
+    "instances": [
+      {
+        "policy": {
+          "machineType": "g2-standard-16",
+          "provisioningModel": "SPOT",
+          "bootDisk": {
+            "image": "projects/ml-images/global/images/c0-deeplearning-common-gpu-v20240128-debian-11-py310",
+            "sizeGb": 150
+          },
+          "accelerators": [
+            {
+              "type": "nvidia-l4",
+              "count": 1
+            }
+          ]
+        },
+        "installGpuDrivers": true
+      }
+    ]
+  },
+  "logsPolicy": {
+    "destination": "CLOUD_LOGGING"
+  }
+}
